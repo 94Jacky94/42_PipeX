@@ -1,0 +1,31 @@
+NAME=pipex
+
+OBJ=ft_split.o ft_strjoin.o\
+	parsing.o transfert.o\
+	pipex.o\
+
+CPPFLAGS=-Wall -Wextra -Werror 
+
+all : $(NAME)
+
+$(NAME) : $(OBJ) 
+	cc $(OBJ) -o pipex
+
+clean:
+	rm -f *.o
+
+fclean: clean
+	rm -f pipex
+
+re : fclean all
+
+#############
+## PATERNS ##
+#############
+#$@: Nom de la regle
+#$<: Nom de la premiere dépendance
+#$^: Nom de la toute les dependances
+%.o: %.c
+	cc $(CPPFLAGS) -c $< -o $@
+
+.PHONY: all clean fclean re
