@@ -33,13 +33,13 @@ char	check(int *fd, char **argv, int *i, int argc)
 			break ;
 	if (j != 8)
 	{
-		if (open_files(fd, argc, argv) == -1)
+		if (open_files(fd, argc, argv, 1) == -1)
 			return (-1);
 		return (1);
 	}
 	if (j == 8)
 	{
-		if (open_files2(fd, argc, argv) == -1)
+		if (open_files(fd, argc, argv, 2) == -1)
 			return (-1);
 		++(*i);
 		return (2);
@@ -100,25 +100,28 @@ void	err(char **arg, char mode)
 int	main(int argc, char **argv, char **env)
 {
 	static t_mi		m = {.i = 1, .mode = 0};
+	t_tabs			t;
 	static int		inc = -1;
 	static int		fd[5];
-	static char		**arg;
 	static pid_t	*fout;
 
+	t.argv = argv;
+	t.env = env;
+	t.arg = NULL;
 	m.mode = check(fd, argv, &(m.i), argc);
 	if (m.mode == -1)
-		return (destroy(arg, fd, fout), EXIT_FAILURE);
+		return (destroy(t.arg, fd, fout), EXIT_FAILURE);
 	fout = malloc((argc - 3) * sizeof(pid_t));
 	if (fout == NULL)
 		return (-1);
 	while (++(m.i) <= *(fd + 4))
 	{
-		if (try_access(*(argv + m.i), &arg) == -1)
-			if (try_path(search_folders(env), arg, PATH_START) == -1)
-				return (err(arg, 1), destroy(arg, fd, fout), EXIT_FAILURE);
-		*(fout + (++inc)) = transfer(arg, env, fd, m);
+		if (try_access(*(argv + m.i), &(t.arg)) == -1)
+			if (try_path(search_folders(env), t.arg, PATH_START) == -1)
+				return (err(t.arg, 1), destroy(t.arg, fd, fout), EXIT_FAILURE);
+		*(fout + (++inc)) = transfer(t.arg, t, fd, m);
 		if (*(fout + inc) == -1)
-			return (err(arg, 2), destroy(arg, fd, fout), EXIT_FAILURE);
+			return (err(t.arg, 2), destroy(t.arg, fd, fout), EXIT_FAILURE);
 	}
-	return (wait_cmd(fout, argc, m.mode), destroy(arg, fd, fout), EXIT_SUCCESS);
+	return (wait_cmd(fout, argc, m.mode), destroy(t.arg, fd, fout), 0);
 }
