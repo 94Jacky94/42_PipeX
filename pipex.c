@@ -79,6 +79,9 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 	}
 	if (fout)
 		free(fout);
+	close(0);
+	close(1);
+	close(2);
 }
 
 void	err(char **arg, char mode)
