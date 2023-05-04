@@ -81,6 +81,22 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 		free(fout);
 }
 
+void	err(char **arg, char mode)
+{
+	int	i;
+
+	if (mode == 1)
+	{
+		i = 0;
+		while (*(*arg + i))
+			++i;
+		write(2, *arg, i);
+		write(2, " : unfound\n", 11);
+		return ;
+	}
+	write (2, "transfert fail\n", 16);
+}
+
 int	main(int argc, char **argv, char **env)
 {
 	static t_mi		m = {.i = 1, .mode = 0};
@@ -99,10 +115,10 @@ int	main(int argc, char **argv, char **env)
 	{
 		if (try_access(*(argv + m.i), &arg) == -1)
 			if (try_path(search_folders(env), arg, PATH_START) == -1)
-				return (destroy(arg, fd, fout), EXIT_FAILURE);
+				return (err(arg, 1), destroy(arg, fd, fout), EXIT_FAILURE);
 		*(fout + (++inc)) = transfer(arg, env, fd, m);
 		if (*(fout + inc) == -1)
-			return (destroy(arg, fd, fout), EXIT_FAILURE);
+			return (err(arg, 2), destroy(arg, fd, fout), EXIT_FAILURE);
 	}
 	return (wait_cmd(fout, argc, m.mode), destroy(arg, fd, fout), EXIT_SUCCESS);
 }
