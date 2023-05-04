@@ -65,24 +65,24 @@ pid_t	transfer(char **arg, char **env, int *fd, t_mi mi)
 	return (fout);
 }
 
-char	open_files(int *fd, int argc)
+char	open_files(int *fd, int argc, char **argv)
 {
-	*(fd + 2) = open("./infile", O_RDONLY);
+	*(fd + 2) = open(*(argv + 1), O_RDONLY);
 	if (*(fd + 2) == -1)
 		return (-1);
-	*(fd + 3) = open("./outfile", O_WRONLY | O_TRUNC);
+	*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_TRUNC);
 	if (*(fd + 3) == -1)
 		return (close(*(fd + 2)), -1);
 	*(fd + 4) = argc - 2;
 	return (0);
 }
 
-char	open_files2(int *fd, int argc)
+char	open_files2(int *fd, int argc, char **argv)
 {
-	*(fd + 2) = open("./infile", O_RDONLY);
+	*(fd + 2) = open(*(argv + 2), O_RDONLY);
 	if (*(fd + 2) == -1)
 		return (-1);
-	*(fd + 3) = open("./outfile", O_WRONLY | O_APPEND);
+	*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_APPEND);
 	if (*(fd + 3) == -1)
 		return (close(*(fd + 2)), -1);
 	*(fd + 4) = argc - 2;

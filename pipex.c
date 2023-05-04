@@ -33,13 +33,13 @@ char	check(int *fd, char **argv, int *i, int argc)
 			break ;
 	if (j != 8)
 	{
-		if (open_files(fd, argc) == -1)
+		if (open_files(fd, argc, argv) == -1)
 			return (-1);
 		return (1);
 	}
 	if (j == 8)
 	{
-		if (open_files2(fd, argc) == -1)
+		if (open_files2(fd, argc, argv) == -1)
 			return (-1);
 		++(*i);
 		return (2);
