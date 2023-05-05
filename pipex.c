@@ -24,8 +24,8 @@ char	check(int *fd, char **argv, int *i, int argc)
 	int		j;
 	char	*str;
 
-	if (argc < 3)
-		return (-1);
+	if (argc < 5)
+		return (write(2, "missing arguments\n", 18), -1);
 	str = "here_doc";
 	j = -1;
 	while (++j < LEN_HERE_DOC)
@@ -39,10 +39,11 @@ char	check(int *fd, char **argv, int *i, int argc)
 	}
 	if (j == 8)
 	{
+		if (argc < 6)
+			return (write(2, "missing arguments\n", 18), -1);
 		if (open_files(fd, argc, argv, 2) == -1)
 			return (-1);
-		++(*i);
-		return (2);
+		return (++(*i), 2);
 	}
 	return (-1);
 }
@@ -68,7 +69,8 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 
 	i = -1;
 	while (++i < 4)
-		close(*(fd + i));
+		if (*(fd + i) > -1)
+			close(*(fd + i));
 	if (arg)
 	{
 		i = -1;
@@ -91,10 +93,20 @@ void	err(char **arg, char mode)
 	if (mode == 1)
 	{
 		i = 0;
-		while (*(*arg + i))
-			++i;
-		write(2, *arg, i);
-		write(2, " : unfound\n", 11);
+		if (arg)
+			if (*arg)
+				while (*(*arg + i))
+					++i;
+		if (arg)
+		{
+			if (*arg)
+			{
+				write(2, *arg, i);
+				write(2, " : unfound\n", 11);
+			}
+			else
+				write(2, "Error no command detected\n", 26);
+		}
 		return ;
 	}
 	write (2, "transfert fail\n", 16);

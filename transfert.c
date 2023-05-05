@@ -121,18 +121,20 @@ char	open_files(int *fd, int argc, char **argv, char mode)
 	if (mode == 1)
 	{
 		*(fd + 2) = open(*(argv + 1), O_RDONLY);
-		if (*(fd + 2) == -1)
-			return (-1);
 		*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_TRUNC | O_CREAT, 0664
 				);
-		if (*(fd + 3) == -1)
-			return (close(*(fd + 2)), -1);
+		if ((*(fd + 3) == -1) && (*(fd + 2) > -1))
+			return (write(2, "Ouput unfound\n", 14), close(*(fd + 2)), -1);
+		else if (*(fd + 3) == -1)
+			return (write(2, "I/O unfound\n", 12), -1);
+		if (*(fd + 2) == -1)
+			return (write(2, "Input unfound\n", 14), -1);
 		*(fd + 4) = argc - 2;
 		return (0);
 	}
 	*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_APPEND | O_CREAT, 0664);
 	if (*(fd + 3) == -1)
-		return (close(*(fd + 2)), -1);
+		return (-1);
 	*(fd + 4) = argc - 2;
 	return (0);
 }
