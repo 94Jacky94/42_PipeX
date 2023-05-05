@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   transefert.c                                       :+:      :+:    :+:   */
+/*   transfert.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/04 15:36:58 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/05 23:33:30 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,22 +45,21 @@ static void	fill_pipe(int *fd2, char *str)
 	return ;
 }
 
-static char	define_in_out2(int *fd2, t_mi m, int *old_read, char **argv)
+static char	define_in_out2(int *fd2, t_mi m, char **argv)
 {
 	if (m.i == 3 && m.mode == 2)
 	{
 		if (pipe(fd2) == -1)
 			return (-1);
 		fill_pipe(fd2, *(argv + 2));
-		*old_read = *fd2;
-		return (close(*(fd2 + 1)), 0);
+		return (dup2(*(fd2), 0), close(*(fd2)), close(*(fd2 + 1)), 0);
 	}
 	return (0);
 }
 
-static char	define_in_out(t_fds f, char **argv, int old_read, t_mi m)
+static char	define_in_out(t_fds f, char **argv, t_mi m)
 {
-	if (pipe(f.fd) == -1)
+	if (pipe(f.fd) == -1 && (*(f.fd + 4)) != m.i)
 		return (-1);
 	if ((m.i == 2 && m.mode == 1))
 	{
@@ -72,48 +71,44 @@ static char	define_in_out(t_fds f, char **argv, int old_read, t_mi m)
 	}
 	if (m.i == (*(f.fd + 4)))
 	{
-		if (dup2(old_read, 0) == -1)
-			return (-1);
 		if (dup2(*(f.fd + 3), 1) == -1)
 			return (-1);
-		return (close(old_read), 0);
+		return (0);
 	}
-	if (define_in_out2(f.fd2, m, &old_read, argv) == -1)
-		return (-1);
-	if (dup2(old_read, 0) == -1)
+	if (define_in_out2(f.fd2, m, argv) == -1)
 		return (-1);
 	if (dup2(*(f.fd + 1), 1) == -1)
 		return (-1);
-	return (close(old_read), 0);
+	return (0);
 }
 
 pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 {
 	pid_t		fout;
-	static int	old_read;
+	int			i;
 	static int	fd2[2];
 	t_fds		f;
 
 	f.fd = fd;
 	f.fd2 = fd2;
-	if (define_in_out(f, t.argv, old_read, mi) == -1)
+	if (define_in_out(f, t.argv, mi) == -1)
 		return (-1);
 	fout = fork();
-	if (fout == -1)
-		return (-1);
 	if (fout > 0)
-		return (old_read = *fd, close(*(fd + 1)), fout);
-	fout = -1;
-	while (++(fout) < LEN_FD)
-		if (*(fd + fout) > 1)
-			close(*(fd + fout));
-	if (*(fd2) > 1)
-		close(*fd2);
-	if (*(fd2 + 1) > 1)
-		close(*(fd2 + 1));
-	if (execve(*arg, arg, t.env) == -1)
-		return (-1);
-	return (fout);
+		return (dup2(*(f.fd), 0), close(*(f.fd)), close(*(fd + 1)), fout);
+	i = -1;
+	while (++i < LEN_FD)
+		if (*(fd + i) > 1)
+			close(*(fd + i));
+	i = -1;
+	while (++i < 2)
+		if (*(fd2 + i) > 1)
+			close(*(fd2 + i));
+	if (arg != NULL)
+		if (*arg != NULL)
+			if (execve(*arg, arg, t.env) == -1)
+				return (-2);
+	return (-2);
 }
 
 char	open_files(int *fd, int argc, char **argv, char mode)

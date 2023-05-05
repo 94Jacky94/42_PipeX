@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/04 15:36:58 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/05 20:37:00 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,12 @@ void	wait_cmd(pid_t *fout, int argc, char mode)
 		limit = argc - 3;
 	else
 		limit = argc - 4;
-	while (++i < limit)
-		waitpid(*(fout + i), &status, 0);
+	while (--limit > -1)
+	{
+		if (*(fout + limit))
+			waitpid(-1, &status, 0);
+fprintf(stderr, "pid = %d, limit = %d\n", *(fout + limit), limit);
+	}
 }
 
 void	destroy(char **arg, int *fd, pid_t *fout)
@@ -86,7 +90,7 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 	close(2);
 }
 
-void	err(char **arg, char mode)
+void	err(char **arg, char mode, int out)
 {
 	int	i;
 
@@ -97,19 +101,21 @@ void	err(char **arg, char mode)
 			if (*arg)
 				while (*(*arg + i))
 					++i;
-		if (arg)
+		if (arg && out > -1)
 		{
 			if (*arg)
 			{
 				write(2, *arg, i);
 				write(2, " : unfound\n", 11);
 			}
-			else
+			else if (out > -1)
 				write(2, "Error no command detected\n", 26);
 		}
-		return ;
+		else if (out > -1)
+				write(2, "Error no command detected\n", 26);
 	}
-	write (2, "transfert fail\n", 16);
+	if (out > -1)
+		write (2, "Transfert fail\n", 16);
 }
 
 int	main(int argc, char **argv, char **env)
@@ -133,10 +139,10 @@ int	main(int argc, char **argv, char **env)
 	{
 		if (try_access(*(argv + m.i), &(t.arg)) == -1)
 			if (try_path(search_folders(env), t.arg, PATH_START) == -1)
-				return (err(t.arg, 1), destroy(t.arg, fd, fout), EXIT_FAILURE);
+				err(t.arg, 1, 0);
 		*(fout + (++inc)) = transfer(t.arg, t, fd, m);
-		if (*(fout + inc) == -1)
-			return (err(t.arg, 2), destroy(t.arg, fd, fout), EXIT_FAILURE);
+		if (*(fout + inc) < 0)
+			return (err(t.arg, 2, *(fout + inc)), destroy(t.arg, fd, fout), EXIT_FAILURE);
 	}
 	return (wait_cmd(fout, argc, m.mode), destroy(t.arg, fd, fout), 0);
 }

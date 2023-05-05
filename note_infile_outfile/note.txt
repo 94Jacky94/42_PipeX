@@ -4,3 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>//EXIT_SUCCESS; EXIT_FAILURE;
 --track-fds=yes --trace-children=yes
+
+errors:
+	si la premiere commande est inexistante les autres doivent s'executer.
