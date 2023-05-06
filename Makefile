@@ -5,7 +5,7 @@ OBJ=ft_split.o ft_strjoin.o\
 	get_next_line.o get_next_line_utils.o\
 	pipex.o\
 
-CPPFLAGS=-Wall -Wextra -Werror 
+CPPFLAGS= -g3 -Wall -Wextra -Werror 
 
 all : $(NAME)
 

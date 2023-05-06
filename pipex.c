@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/05 20:37:00 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/06 02:28:51 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,31 +21,29 @@
 
 char	check(int *fd, char **argv, int *i, int argc)
 {
-	int		j;
-	char	*str;
+	int			j;
+	static char	*str = "here_doc";
 
 	if (argc < 5)
 		return (write(2, "missing arguments\n", 18), -1);
-	str = "here_doc";
 	j = -1;
 	while (++j < LEN_HERE_DOC)
 		if (*(*(argv + 1) + j) != *(str + j))
 			break ;
 	if (j != 8)
 	{
-		if (open_files(fd, argc, argv, 1) == -1)
+		j = open_files(fd, argc, argv, 1);
+		if (j == -1)
 			return (-1);
+		if (j == 1)
+			return (++(*i), 0);
 		return (1);
 	}
-	if (j == 8)
-	{
-		if (argc < 6)
-			return (write(2, "missing arguments\n", 18), -1);
-		if (open_files(fd, argc, argv, 2) == -1)
-			return (-1);
-		return (++(*i), 2);
-	}
-	return (-1);
+	if (argc < 6)
+		return (write(2, "missing arguments\n", 18), -1);
+	if (open_files(fd, argc, argv, 2) == -1)
+		return (-1);
+	return (++(*i), 2);
 }
 
 void	wait_cmd(pid_t *fout, int argc, char mode)
@@ -60,11 +58,8 @@ void	wait_cmd(pid_t *fout, int argc, char mode)
 	else
 		limit = argc - 4;
 	while (--limit > -1)
-	{
 		if (*(fout + limit))
 			waitpid(-1, &status, 0);
-fprintf(stderr, "pid = %d, limit = %d\n", *(fout + limit), limit);
-	}
 }
 
 void	destroy(char **arg, int *fd, pid_t *fout)
@@ -87,7 +82,6 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 		free(fout);
 	close(0);
 	close(1);
-	close(2);
 }
 
 void	err(char **arg, char mode, int out)
