@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/06 02:28:51 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/06 02:46:50 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ void	err(char **arg, char mode, int out)
 				write(2, "Error no command detected\n", 26);
 		}
 		else if (out > -1)
-				write(2, "Error no command detected\n", 26);
+			write(2, "Error no command detected\n", 26);
 	}
 	if (out > -1)
 		write (2, "Transfert fail\n", 16);
@@ -116,7 +116,7 @@ int	main(int argc, char **argv, char **env)
 {
 	static t_mi		m = {.i = 1, .mode = 0};
 	t_tabs			t;
-	static int		inc = -1;
+	static int		j = -1;
 	static int		fd[5];
 	static pid_t	*fout;
 
@@ -134,9 +134,9 @@ int	main(int argc, char **argv, char **env)
 		if (try_access(*(argv + m.i), &(t.arg)) == -1)
 			if (try_path(search_folders(env), t.arg, PATH_START) == -1)
 				err(t.arg, 1, 0);
-		*(fout + (++inc)) = transfer(t.arg, t, fd, m);
-		if (*(fout + inc) < 0)
-			return (err(t.arg, 2, *(fout + inc)), destroy(t.arg, fd, fout), EXIT_FAILURE);
+		*(fout + (++j)) = transfer(t.arg, t, fd, m);
+		if (*(fout + j) < 0)
+			return (err(t.arg, 2, *(fout + j)), destroy(t.arg, fd, fout), 1);
 	}
 	return (wait_cmd(fout, argc, m.mode), destroy(t.arg, fd, fout), 0);
 }
