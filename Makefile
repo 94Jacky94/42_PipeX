@@ -17,6 +17,8 @@ clean:
 
 fclean: clean
 	rm -f pipex
+	rm -f infile
+	rm -f outfile
 
 re : fclean all
 
