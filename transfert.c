@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/06 02:23:17 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/07 20:58:54 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ static void	fill_pipe(int *fd2, char *str)
 	{
 		buffer = gnl(STDIN);
 		if (buffer == NULL)
-			return (write(2, "gnl_stdin_failed\n", 17), (void)0);
+			return (write(2, "\ngnl_stdin_failed\n", 18), (void)0);
 		inc = 0;
 		while (*(buffer + inc))
 			++inc;
@@ -56,7 +56,7 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 			return (-1);
 		return (close(*(f.fd2)), close(*(f.fd2 + 1)), 0);
 	}
-	if (m.mode == 0)
+	if (m.i == 3 && m.mode == 0)
 	{
 		if (pipe(f.fd2) == -1)
 			return (-1);
@@ -64,8 +64,12 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 			return (-1);
 		return (close(*(f.fd2)), close(*(f.fd2 + 1)), 0);
 	}
-	if (dup2(*(f.fd + 2), 0) == -1)
-		return (-1);
+	if (m.i == 2 && m.mode == 1)
+	{
+		if (dup2(*(f.fd + 2), 0) == -1)
+			return (-1);
+		return (close(*(f.fd + 2)), 0);
+	}
 	return (0);
 }
 
@@ -82,6 +86,8 @@ static char	define_in_out(t_fds f, char **argv, t_mi m)
 	}
 	if (m.i == (*(f.fd + 4)))
 	{
+		if (m.i == 3)
+			define_in_out2(f, m, argv);
 		if (dup2(*(f.fd + 3), 1) == -1)
 			return (-1);
 		return (0);

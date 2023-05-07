@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/06 02:46:50 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/07 15:58:35 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	wait_cmd(pid_t *fout, int argc, char mode)
 		limit = argc - 4;
 	while (--limit > -1)
 		if (*(fout + limit))
-			waitpid(-1, &status, 0);
+			waitpid(*(fout + limit), &status, 0);
 }
 
 void	destroy(char **arg, int *fd, pid_t *fout)

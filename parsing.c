@@ -6,7 +6,7 @@
 /*   By: jboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 14:06:58 by jboyreau          #+#    #+#             */
-/*   Updated: 2023/05/04 15:36:58 by jboyreau         ###   ########.fr       */
+/*   Updated: 2023/05/07 18:03:58 by jboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,8 @@ char	try_path(char *env_var, char **path, int i)
 	char			*new;
 
 	test = 0;
+	if (env_var == NULL)
+		return (-1);
 	while (*(env_var + i))
 	{
 		new = ft_strjoin(env_var, *path, &i);
