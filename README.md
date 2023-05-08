@@ -4,11 +4,11 @@ Just like the linux shell pipe "|".
 
 Usage example (if the first parameter isn't here_doc, the content of outfile will be replaced by the output of the last program):
 
-	./pipex infile "grep toto" "grep titi" "wc" outfile
+	./pipex infile "cmd_1" "cmd_2" ... "cmd_n" outfile
 
 Set the first parameter to here_doc, in order to replace the input by the stdin, then replace the string LIMITER by one of your choice (as following):
 
-	./pipex here_doc LIMITER "grep toto" "grep titi" "wc" outfile
+	./pipex here_doc LIMITER "cmd_1" "cmd_2" ... "cmd_n" outfile
 	
 The keyword here_doc is supposed to make the programm mimic this commande line:
 
