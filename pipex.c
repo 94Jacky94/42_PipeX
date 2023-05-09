@@ -48,11 +48,9 @@ char	check(int *fd, char **argv, int *i, int argc)
 
 void	wait_cmd(pid_t *fout, int argc, char mode)
 {
-	int	i;
 	int	status;
 	int	limit;
 
-	i = -1;
 	if (mode == 1)
 		limit = argc - 3;
 	else
