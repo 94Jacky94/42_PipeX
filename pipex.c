@@ -53,6 +53,8 @@ void	wait_cmd(pid_t *fout, int argc, char mode)
 
 	if (mode == 1)
 		limit = argc - 3;
+	else if (mode == 0)
+		limit = argc - 4;
 	else
 		limit = argc - 4;
 	while (--limit > -1)
