@@ -113,13 +113,13 @@ pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 	fout = fork();
 	if (fout == -1)
 		return (perror("Error fork "), -1);
-	if (fout > 0)
+	if (fout-- > 0)
 	{
 		if (dup2(*(f.fd), 0))
 			return (perror("Error dup2 "), -1);
-		return (close(*(f.fd)), close(*(fd + 1)), fout);
+		return (close(*(f.fd)), close(*(fd + 1)), ++fout);
 	}
-	fout = -1;
+	(close(*(t.fd_org)), close(*(t.fd_org + 1)));
 	while (++fout < LEN_FD)
 		if (*(fd + fout) > 1)
 			close(*(fd + fout));
