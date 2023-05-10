@@ -113,10 +113,10 @@ char	*gnl(int fd)
 	{
 		test = ft_read(b, fd);
 		if (test == -1 || (test == 0 && next_line == 0 && *b == 0))
-			return (0);
+			return (NULL);
 		next_line = ft_realloc(next_line, b, &alloc);
 		if (next_line == 0)
-			return (0);
+			return (NULL);
 		if (ft_check_next_line(next_line, test) == 0)
 			break ;
 	}

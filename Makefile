@@ -1,9 +1,9 @@
 NAME=pipex
 
 OBJ=ft_split.o ft_strjoin.o\
-	parsing.o transfert.o\
 	get_next_line.o get_next_line_utils.o\
-	pipex.o\
+	p_parsing.o p_transfert.o\
+	p_pipex.o\
 
 CPPFLAGS= -g3 -Wall -Wextra -Werror 
 

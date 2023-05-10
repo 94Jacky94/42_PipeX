@@ -29,7 +29,7 @@ static void	fill_pipe(int *fd2, char *str)
 	{
 		buffer = gnl(STDIN);
 		if (buffer == NULL)
-			return (write(2, "\ngnl_stdin_failed\n", 18), (void)0);
+			return (perror("Warning : here_doc delimited by EOF "), (void)0);
 		inc = 0;
 		while (*(buffer + inc))
 			++inc;
@@ -53,7 +53,7 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 			return (-1);
 		fill_pipe(f.fd2, *(argv + 2));
 		if (dup2(*(f.fd2), 0) == -1)
-			return (-1);
+			return (perror("Error dup2 "), -1);
 		return (close(*(f.fd2)), close(*(f.fd2 + 1)), 0);
 	}
 	if (m.i == 3 && m.mode == 0)
@@ -61,13 +61,13 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 		if (pipe(f.fd2) == -1)
 			return (-1);
 		if (dup2(*(f.fd2), 0) == -1)
-			return (-1);
+			return (perror("Error dup2 "), -1);
 		return (close(*(f.fd2)), close(*(f.fd2 + 1)), 0);
 	}
 	if (m.i == 2 && m.mode == 1)
 	{
 		if (dup2(*(f.fd + 2), 0) == -1)
-			return (-1);
+			return (perror("Error dup2 "), -1);
 		return (close(*(f.fd + 2)), 0);
 	}
 	return (0);
@@ -79,9 +79,10 @@ static char	define_in_out(t_fds f, char **argv, t_mi m)
 		return (-1);
 	if (m.i == 2 && (m.mode == 1 || m.mode == 0))
 	{
-		define_in_out2(f, m, argv);
-		if (dup2(*(f.fd + 1), 1) == -1)
+		if (define_in_out2(f, m, argv) < 0)
 			return (-1);
+		if (dup2(*(f.fd + 1), 1) == -1)
+			return (perror("Error dup2 "), -1);
 		return (0);
 	}
 	if (m.i == (*(f.fd + 4)))
@@ -89,13 +90,13 @@ static char	define_in_out(t_fds f, char **argv, t_mi m)
 		if (m.i == 3)
 			define_in_out2(f, m, argv);
 		if (dup2(*(f.fd + 3), 1) == -1)
-			return (-1);
+			return (perror("Error dup2 "), -1);
 		return (0);
 	}
-	if (define_in_out2(f, m, argv) == -1)
+	if (define_in_out2(f, m, argv) < 0)
 		return (-1);
 	if (dup2(*(f.fd + 1), 1) == -1)
-		return (-1);
+		return (perror("Error dup2 "), -1);
 	return (0);
 }
 
@@ -110,10 +111,12 @@ pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 	if (define_in_out(f, t.argv, mi) == -1)
 		return (-1);
 	fout = fork();
+	if (fout == -1)
+		return (perror("Error fork "), -1);
 	if (fout > 0)
 	{
 		if (dup2(*(f.fd), 0))
-			return (-1);
+			return (perror("Error dup2 "), -1);
 		return (close(*(f.fd)), close(*(fd + 1)), fout);
 	}
 	fout = -1;
@@ -123,28 +126,26 @@ pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 	if (arg != NULL)
 		if (*arg != NULL)
 			execve(*arg, arg, t.env);
-	return (-2);
+	return (-1);
 }
 
 char	open_files(int *fd, int argc, char **argv, char mode)
 {
 	if (mode == 1)
 	{
-		*(fd + 2) = open(*(argv + 1), O_RDONLY);
 		*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_TRUNC | O_CREAT, 0664
 				);
-		if ((*(fd + 3) == -1) && (*(fd + 2) > -1))
-			return (write(2, "Ouput unfound\n", 14), close(*(fd + 2)), -1);
-		else if (*(fd + 3) == -1)
-			return (write(2, "I/O unfound\n", 12), -1);
+		if (*(fd + 3) == -1)
+			return (perror("Output access denied "), -1);
+		*(fd + 2) = open(*(argv + 1), O_RDONLY);
 		if (*(fd + 2) == -1)
-			return (*(fd + 4) = argc - 2, write(2, "Input unfound\n", 14), 1);
+			return (*(fd + 4) = argc - 2, perror("Iunput access denied "), 1);
 		*(fd + 4) = argc - 2;
 		return (0);
 	}
 	*(fd + 3) = open(*(argv + argc - 1), O_WRONLY | O_APPEND | O_CREAT, 0664);
 	if (*(fd + 3) == -1)
-		return (-1);
+		return (perror("Output access denied "), -1);
 	*(fd + 4) = argc - 2;
 	return (0);
 }
