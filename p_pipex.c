@@ -58,10 +58,10 @@ void	wait_cmd(int argc, char mode)
 	else
 		limit = argc - 4;
 	while (--limit > -1)
-			waitpid(-1, &status, 0);
+		waitpid(-1, &status, 0);
 }
 
-void	destroy(char **arg, int *fd, pid_t *fout)
+void	destroy(char **arg, int *fd, int *fd_org, pid_t *fout)
 {
 	int	i;
 
@@ -79,8 +79,8 @@ void	destroy(char **arg, int *fd, pid_t *fout)
 	}
 	if (fout)
 		free(fout);
-	close(0);
-	close(1);
+	(dup2(*(fd_org), 0), close(*(fd_org)));
+	(dup2(*(fd_org + 1), 1), close(*(fd_org + 1)));
 }
 
 void	err(char **arg)
@@ -96,6 +96,8 @@ void	err(char **arg)
 	{
 		if (*arg)
 			(write(2, *arg, i), write(2, " : Command not found\n", 21));
+		else
+			write(2, "Command not found\n", 18);
 	}
 	else
 		write(2, "Command not found\n", 18);
@@ -103,29 +105,29 @@ void	err(char **arg)
 
 int	main(int argc, char **argv, char **env)
 {
-	static t_mi		m = {.i = 1, .mode = 0};
-	t_tabs			t;
-	static int		j = -1;
+	static t_mi		m = {.i = 1, .j = -1, .mode = 0};
+	static t_tabs	t;
 	static int		fd[5];
 	static pid_t	*fout;
 
 	t.argv = argv;
 	t.env = env;
-	t.arg = NULL;
+	*(t.fd_org) = dup(0);
+	*(t.fd_org + 1) = dup(1);
 	m.mode = check(fd, argv, &(m.i), argc);
 	if (m.mode == -1)
-		return (destroy(t.arg, fd, fout), EXIT_FAILURE);
+		return (destroy(t.arg, fd, t.fd_org, fout), EXIT_FAILURE);
 	fout = malloc((argc - 3) * sizeof(pid_t));
 	if (fout == NULL)
-		return (-1);
+		return (EXIT_FAILURE);
 	while (++(m.i) <= *(fd + 4))
 	{
 		if (try_access(*(argv + m.i), &(t.arg)) == -1)
 			if (try_path(search_folders(env), t.arg, PATH_START) == -1)
 				err(t.arg);
-		*(fout + (++j)) = transfer(t.arg, t, fd, m);
-		if (*(fout + j) == -1)
-			return (destroy(t.arg, fd, fout), 1);
+		*(fout + (++(m.j))) = transfer(t.arg, t, fd, m);
+		if (*(fout + m.j) == -1)
+			return (destroy(t.arg, fd, t.fd_org, fout), EXIT_FAILURE);
 	}
-	return (wait_cmd(argc, m.mode), destroy(t.arg, fd, fout), 0);
+	return (wait_cmd(argc, m.mode), destroy(t.arg, fd, t.fd_org, fout), 0);
 }

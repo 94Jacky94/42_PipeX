@@ -16,6 +16,7 @@
 typedef struct mode_index
 {
 	int		i;
+	int		j;
 	char	mode;
 }	t_mi;
 
@@ -24,6 +25,7 @@ typedef struct arrays
 	char	**argv;
 	char	**env;
 	char	**arg;
+	int		fd_org[2];
 }	t_tabs;
 
 typedef struct file_desciptors
