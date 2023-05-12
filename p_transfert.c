@@ -126,7 +126,7 @@ pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 	if (arg != NULL)
 		if (*arg != NULL)
 			execve(*arg, arg, t.env);
-	return (perror("Error execve "), -1);
+	return (-1);
 }
 
 char	open_files(int *fd, int argc, char **argv, char mode)
