@@ -139,7 +139,7 @@ char	open_files(int *fd, int argc, char **argv, char mode)
 			return (perror("Output access denied "), -1);
 		*(fd + 2) = open(*(argv + 1), O_RDONLY);
 		if (*(fd + 2) == -1)
-			return (*(fd + 4) = argc - 2, perror("Iunput access denied "), 1);
+			return (*(fd + 4) = argc - 2, perror("Input access denied "), 1);
 		*(fd + 4) = argc - 2;
 		return (0);
 	}
