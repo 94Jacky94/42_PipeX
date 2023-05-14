@@ -50,7 +50,7 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 	if (m.i == 3 && m.mode == 2)
 	{
 		if (pipe(f.fd2) == -1)
-			return (-1);
+			return (perror("Error pipe "), -1);
 		fill_pipe(f.fd2, *(argv + 2));
 		if (dup2(*(f.fd2), 0) == -1)
 			return (perror("Error dup2 "), -1);
@@ -76,7 +76,7 @@ static char	define_in_out2(t_fds f, t_mi m, char **argv)
 static char	define_in_out(t_fds f, char **argv, t_mi m)
 {
 	if (pipe(f.fd) == -1 && (*(f.fd + 4)) != m.i)
-		return (-1);
+		return (perror("Error pipe "), -1);
 	if (m.i == 2 && (m.mode == 1 || m.mode == 0))
 	{
 		if (define_in_out2(f, m, argv) < 0)
@@ -115,7 +115,7 @@ pid_t	transfer(char **arg, t_tabs t, int *fd, t_mi mi)
 		return (perror("Error fork "), -1);
 	if (fout-- > 0)
 	{
-		if (dup2(*(f.fd), 0))
+		if (dup2(*(f.fd), 0) == -1)
 			return (perror("Error dup2 "), -1);
 		return (close(*(f.fd)), close(*(fd + 1)), ++fout);
 	}
