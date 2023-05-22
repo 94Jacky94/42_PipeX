@@ -33,7 +33,12 @@ char	try_access(char *cmd_arg, char ***arg)
 	*arg = ft_split(cmd_arg, ' ');
 	if (*arg == NULL || **arg == 0)
 		return (-1);
-	if (access(**arg, F_OK | X_OK) == -1)
+	if ((***arg == '.' && *((**arg) + 1)) == '/') || ***arg == '/')
+	{
+		if (access(**arg, F_OK | X_OK) == -1)
+			return (-1);
+	}
+	else
 		return (-1);
 	return (0);
 }
